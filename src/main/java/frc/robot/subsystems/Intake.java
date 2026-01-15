@@ -9,7 +9,7 @@ public class Intake extends SubsystemBase {
     public SparkMax motor; // NEO en outtake
 
     public Intake() {
-        motor = new SparkMax(6, MotorType.kBrushed);
+        motor = new SparkMax(7, MotorType.kBrushed);
     }
 
     public void shoot(double speed) {

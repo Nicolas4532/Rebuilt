@@ -1,5 +1,8 @@
 package frc.robot;
 
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
@@ -16,6 +19,7 @@ public class Robot extends TimedRobot {
   public double startTime;
 
 
+
   // Control de velocidad del drivetrain
   private double drivelimit = 1.0;
   private int lastPOV = -1; // para detectar cambios en la cruceta
@@ -29,6 +33,9 @@ public class Robot extends TimedRobot {
     shooter = new Shooter();
     intake = new Intake();
     controller = new XboxController(0);
+ 
+
+    
   }
 
   @Override
@@ -91,19 +98,23 @@ public class Robot extends TimedRobot {
     boolean rightBumperPressed = controller.getRawButton(6);
 
     if (rightTriggerPressed) {
-      shooter.shoot(-1.0);
-    } else if (rightBumperPressed) {
       shooter.reverse(-1.0);
-    } else {
-      shooter.stop();
-    }
-
-        if (leftTriggerPressed) {
+      intake.shoot(-1);
+    } else if (leftTriggerPressed) {
       intake.shoot(-1.0);
+      shooter.shoot(-1);
     } else if (leftBumperPressed) {
+      shooter.reverse(-1);
       intake.reverse(-1.0);
-} else {  
+    } else {  
       intake.stop();
+      shooter.stop();
     }
   }
 }
+    
+  
+
+
+  
+
