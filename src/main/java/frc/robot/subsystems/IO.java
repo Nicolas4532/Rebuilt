@@ -4,23 +4,35 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Intake extends SubsystemBase {
+public class IO extends SubsystemBase {
 
-    public SparkMax motor; // NEO en outtake
+    public SparkMax motor1;
+    public SparkMax motor2; 
 
-    public Intake() {
-        motor = new SparkMax(7, MotorType.kBrushed);
+    public IO() {
+        motor1 = new SparkMax(7, MotorType.kBrushed);
+        motor2 = new SparkMax(8, MotorType.kBrushed);
     }
-
+    
     public void shoot(double speed) {
-        motor.set(speed);
+        motor1.set(-speed);
+        motor2.set(speed);
     }
 
-    public void reverse(double speed) {
-        motor.set(-speed);
+    public void intake(double speed) {
+        motor1.set(-speed);
+        motor2.set(-speed);
     }
 
-    public void stop() {
-        motor.set(0);
+    public void outtake(double speed) {
+        motor1.set(speed);
+        motor2.set(speed);
     }
+
+    public void stop(double speed) {
+        motor1.set(0);
+        motor2.set(0);
+    }
+
 }
+

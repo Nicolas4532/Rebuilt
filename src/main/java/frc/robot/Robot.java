@@ -5,12 +5,12 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.IO;
-import frc.robot.subsystems.Turret;
+//import frc.robot.subsystems.Turret;
 
 public class Robot extends TimedRobot {
 
   public Drivetrain drivetrain;
-  public Turret turret;
+  //public Turret turret;
   public XboxController controller;
   public double startTime;
   public IO io;
@@ -18,14 +18,14 @@ public class Robot extends TimedRobot {
 
 
   // Control de velocidad del drivetrain
-  private double drivelimit = 1.0;
 
   public Robot() {}
 
   @Override
   public void robotInit() {
-    turret = new Turret();
+    //turret = new Turret();
     drivetrain = new Drivetrain();
+    io = new IO();
     controller = new XboxController(0);
   }
 
@@ -55,7 +55,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
 
-    drivetrain.drive(controller.getRightY() * drivelimit, controller.getLeftX() * drivelimit);
+    drivetrain.drive(controller.getRightY(), controller.getLeftX());
 
     boolean rightTriggerPressed = controller.getRawAxis(3) > 0.05;
     boolean leftTriggerPressed = controller.getRawAxis(2) > 0.05;
@@ -72,18 +72,5 @@ public class Robot extends TimedRobot {
       io.stop(1);
     }
 
-    if (rightBumperPressed) {
-      turret.rotateRight(.5);
-    } else if (leftBumperPressed) {
-      turret.rotateLeft(.5);
-    } else if (controller.getXButton()) {
-      turret.shoot(1);
-    } else if (controller.getYButton()) {
-      turret.hoodUp(1);
-    } else if (controller.getAButton()) {
-      turret.hoodDown(1);
-    } else {
-      turret.stop(1);
-    }
   }
 }
