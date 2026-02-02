@@ -10,22 +10,22 @@ public class IO extends SubsystemBase {
     public SparkMax motor2; 
 
     public IO() {
-        motor1 = new SparkMax(7, MotorType.kBrushed);
+        motor1 = new SparkMax(7, MotorType.kBrushless);
         motor2 = new SparkMax(8, MotorType.kBrushed);
     }
     
     public void shoot(double speed) {
-        motor1.set(-speed);
+        motor1.set(speed);
         motor2.set(speed);
     }
 
     public void intake(double speed) {
-        motor1.set(-speed);
+        motor1.set(speed);
         motor2.set(-speed);
     }
 
     public void outtake(double speed) {
-        motor1.set(speed);
+        motor1.set(-speed);
         motor2.set(speed);
     }
 
