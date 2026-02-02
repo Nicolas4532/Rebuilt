@@ -1,5 +1,6 @@
 package frc.robot;
 
+import com.ctre.phoenix6.hardware.Pigeon2;
 import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -18,6 +19,8 @@ public class Robot extends TimedRobot {
   public double kP = 0.005;
   public NetworkTable limelight;
   public double kAim = 0.0015;   // ganancia para apuntar (se ajusta)
+  public Pigeon2 pigeon;
+  
 
   public Drivetrain drivetrain;
   public Turret turret;
@@ -44,6 +47,7 @@ public class Robot extends TimedRobot {
     homePosition = encoder.getPosition();
 
     limelight = NetworkTableInstance.getDefault().getTable("limelight");
+    pigeon = new Pigeon2(0); // CAN ID correcto
   }
 
 
@@ -72,6 +76,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
+
+    pigeon.setYaw(0);
 
     drivetrain.drive(controller.getRightY(), controller.getLeftX());
 
