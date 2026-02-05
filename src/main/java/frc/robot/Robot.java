@@ -1,126 +1,137 @@
 package frc.robot;
 
-import com.ctre.phoenix6.hardware.Pigeon2;
-import com.revrobotics.RelativeEncoder;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
-
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.math.MathUtil;
+
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+
+import com.ctre.phoenix6.hardware.Pigeon2;
+import com.revrobotics.RelativeEncoder;
+
 import frc.robot.subsystems.Drivetrain;
-import frc.robot.subsystems.IO;
 import frc.robot.subsystems.Turret;
+import frc.robot.subsystems.IO;
 
-//Variables Globales
 public class Robot extends TimedRobot {
-
-  public double homePosition;
-  public double kP = 0.005;
-  public NetworkTable limelight;
-  public double kAim = 0.0015;   // ganancia para apuntar (se ajusta)
-  public Pigeon2 pigeon;
   
+  // ==================== CONSTANTES PIGEON ================
+  private boolean autoTurnActive = false;
+  private double targetYaw = 0.0;
+  private static final double kTurnKP = 0.01;
+  private static final double kYawTolerance = 1.0;
+  public double lastPrintTime = 0.0;
+  // ==================== CONSTANTES LL ====================
+  private static final double kTurretKP = 0.006;   // Limelight → torreta
+  private static final double kHoldKP   = 0.003;    // encoder hold
+  private static final double kDeadband = 0.02;      // grados Limelight
+  private static final double kMaxTurretSpeed = 1;
+  private static final double kTurretMinRot = -8.93;
+  private static final double kTurretMaxRot =  8.93;
 
-  public Drivetrain drivetrain;
-  public Turret turret;
-  public XboxController controller;
-  public double startTime;
-  public IO io;
-  public RelativeEncoder encoder;
+  // ==================== HARDWARE ====================
+  private Drivetrain drivetrain;
+  private Turret turret;
+  private IO io;
+  private XboxController controller;
 
+  private NetworkTable limelight;
+  private RelativeEncoder turretEncoder;
+  private Pigeon2 pigeon;
 
-
-  // Control de velocidad del drivetrain
-
-  public Robot() {}
+  // ==================== ESTADO ====================
+  private double holdPosition = 0;
 
   @Override
   public void robotInit() {
-    turret = new Turret();
     drivetrain = new Drivetrain();
+    turret = new Turret();
     io = new IO();
     controller = new XboxController(0);
 
-    encoder = turret.motor3.getEncoder(); // SIN RelativeEncoder adelante
-    encoder.setPosition(0);
-    homePosition = encoder.getPosition();
-
     limelight = NetworkTableInstance.getDefault().getTable("limelight");
-    pigeon = new Pigeon2(0); // CAN ID correcto
-  }
 
+    turretEncoder = turret.motor3.getEncoder();
+    turretEncoder.setPosition(0);
+    holdPosition = turretEncoder.getPosition();
 
-  @Override
-  public void robotPeriodic() {}
+    pigeon = new Pigeon2(0);
+    pigeon.setYaw(0);
 
-  @Override
-  public void autonomousInit() {
-    startTime = Timer.getFPGATimestamp(); // Guarda el tiempo en el que inició autónomo
-  }
-
-  @Override
-  public void autonomousPeriodic() {
-    double timeElapsed = Timer.getFPGATimestamp() - startTime;
-
-    if (timeElapsed < 3.0) {
-      drivetrain.drive(-0.5, 0); // Avanza hacia adelante por 3 segundos
-    } else {
-      drivetrain.drive(0, 0); // Se detiene después
-    }
-  }
-
-  @Override
-  public void teleopInit() {
+    DriverStation.reportWarning("Robot iniciado correctamente", false);
   }
 
   @Override
   public void teleopPeriodic() {
+    
+    //===================== BOTONES ========================
+    boolean leftBumper = controller.getLeftBumperPressed();
+    boolean rightBumper = controller.getRightBumper();
+    //===================== PIGEON ========================
+    double yaw = pigeon.getYaw().getValueAsDouble();
+    double pitch = pigeon.getPitch().getValueAsDouble();
+    double roll = pigeon.getRoll().getValueAsDouble();
 
-    pigeon.setYaw(0);
+    // ==================== DRIVETRAIN ====================
+    double forward = controller.getRightY();
+    double turn = controller.getLeftX();
+    drivetrain.drive(forward, turn);
 
-    drivetrain.drive(controller.getRightY(), controller.getLeftX());
-
-    double RightStick = controller.getRightX();
-    boolean RightStickActive = Math.abs(RightStick) > 0.07;
-
-    boolean rightTriggerPressed = controller.getRawAxis(3) > 0.05;
-    boolean leftTriggerPressed = controller.getRawAxis(2) > 0.05;
-    boolean leftBumperPressed = controller.getRawButton(5);
-    boolean autoAim = controller.getRightBumper();
-
-    double tx = limelight.getEntry("tx").getDouble(0.0);
-    double tv = limelight.getEntry("tv").getDouble(0.0);
-
-    if (tv == 1) { // ve un AprilTag
-    double error = tx;   // queremos tx = 0
-    double output = kAim * error;
-
-    // limitar velocidad
-    output = Math.max(-0.3, Math.min(0.3, output));
-
-    turret.rotate(output);
-} else {
-    turret.stop(0);
-}
-
-    if (rightTriggerPressed) {
+    // ==================== INTAKE / SHOOT ====================
+    if (controller.getRawAxis(3) > 0.05) {
       io.shoot(1);
-    } else if (leftTriggerPressed) {
+    } else if (controller.getRawAxis(2) > 0.05) {
       io.intake(1);
     } else if (controller.getBButton()) {
       io.outtake(1);
-    } else {  
+    } else {
       io.stop(1);
     }
 
-if (autoAim && tv == 1) {
-    double output = kAim * tx;
-    output = Math.max(-0.3, Math.min(0.3, output));
-    turret.rotate(output);
-} else {
-    turret.stop(0);
-}
+    // ==================== LIMELIGHT ====================
+    double tx = limelight.getEntry("tx").getDouble(999);
+    double tv = limelight.getEntry("tv").getDouble(0);
+    double ty = limelight.getEntry("ty").getDouble(999);
+
+    double turretCmd = 0;
+
+    if (tv == 1) {
+      // -------- TARGET VISIBLE --------
+      if (Math.abs(tx) > kDeadband) {
+        turretCmd = -kTurretKP * tx;
+      }
+
+      holdPosition = turretEncoder.getPosition();
+
+    } else {
+      // -------- TARGET PERDIDO → HOLD --------
+      double error = holdPosition - turretEncoder.getPosition();
+      turretCmd = kHoldKP * error;
+    }
+    
+    turretCmd = MathUtil.clamp(turretCmd, -kMaxTurretSpeed, kMaxTurretSpeed);
+
+    if (Math.abs(turretCmd) < 0.02) {
+      turret.stop(1);
+    } else {
+      turret.rotate(turretCmd);
+    }
+    // ==================== DASHBOARD ====================
+    SmartDashboard.putNumber("Limelight tx", tx);
+    SmartDashboard.putNumber("Limelight tv", tv);
+    SmartDashboard.putNumber("Turret Encoder", turretEncoder.getPosition());
+    SmartDashboard.putNumber("Turret Cmd", turretCmd);
+
+    double now = Timer.getFPGATimestamp();
+  if (now - lastPrintTime > 0.5) {
+      lastPrintTime = now;
+
+      DriverStation.reportWarning(String.format("Pigeon | Yaw: %.2f | Pitch: %.2f | Roll: %.2f",yaw, pitch, roll),false);
+  }
 
   }
 }
