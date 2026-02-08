@@ -10,10 +10,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Drivetrain extends SubsystemBase {
 
-        public SparkMax leftMotorLeader; // Drivetrain cims izquierdo 1
-        public SparkMax leftMotorFollower; // Drivetrain cims izquierdo 2
-        public SparkMax rightMotorLeader; // Drivetrain cims derecho 1
-        public SparkMax rightMotorFollower; // Drivetrain cims derecho 2
+        public SparkMax leftMotorLeader;
+        public SparkMax leftMotorFollower;
+        public SparkMax rightMotorLeader;
+        public SparkMax rightMotorFollower;
 
         public DifferentialDrive differentialDrive;
 
@@ -29,7 +29,9 @@ public class Drivetrain extends SubsystemBase {
                 SparkMaxConfig rightMotorLeaderConfig = new SparkMaxConfig();
                 SparkMaxConfig rightMotorFollowerConfig = new SparkMaxConfig();
 
-                baseConfig.idleMode(IdleMode.kCoast); // aqui se configura si es coast o brake
+                baseConfig
+                    .idleMode(IdleMode.kBrake)
+                    .closedLoopRampRate(0.1);
 
                 leftMotorFollowerConfig
                                 .apply(baseConfig)
@@ -43,7 +45,8 @@ public class Drivetrain extends SubsystemBase {
                                 .apply(baseConfig)
                                 .follow(rightMotorLeader);
 
-                leftMotorLeader.configure(baseConfig, com.revrobotics.spark.SparkBase.ResetMode.kResetSafeParameters,
+                leftMotorLeader.configure(baseConfig, 
+                                com.revrobotics.spark.SparkBase.ResetMode.kResetSafeParameters,
                                 PersistMode.kNoPersistParameters);
                 leftMotorFollower.configure(leftMotorFollowerConfig,
                                 com.revrobotics.spark.SparkBase.ResetMode.kResetSafeParameters,
@@ -56,6 +59,7 @@ public class Drivetrain extends SubsystemBase {
                                 PersistMode.kNoPersistParameters);
 
                 differentialDrive = new DifferentialDrive(leftMotorLeader, rightMotorLeader);
+                differentialDrive.setDeadband(0.05);
         }
 
         public void drive(double speed, double rotation) {
