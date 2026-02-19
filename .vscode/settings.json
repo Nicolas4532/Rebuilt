@@ -57,5 +57,25 @@
     "edu.wpi.first.math.**.proto.*",
     "edu.wpi.first.math.**.struct.*",
   ],
-  "java.dependency.enableDependencyCheckup": false
+  "java.dependency.enableDependencyCheckup": false,
+  "workbench.colorCustomizations": {
+    "activityBar.activeBackground": "#353270",
+    "activityBar.background": "#353270",
+    "activityBar.foreground": "#e7e7e7",
+    "activityBar.inactiveForeground": "#e7e7e799",
+    "activityBarBadge.background": "#b0534f",
+    "activityBarBadge.foreground": "#e7e7e7",
+    "commandCenter.border": "#e7e7e799",
+    "sash.hoverBorder": "#353270",
+    "statusBar.background": "#24224d",
+    "statusBar.foreground": "#e7e7e7",
+    "statusBarItem.hoverBackground": "#353270",
+    "statusBarItem.remoteBackground": "#24224d",
+    "statusBarItem.remoteForeground": "#e7e7e7",
+    "titleBar.activeBackground": "#24224d",
+    "titleBar.activeForeground": "#e7e7e7",
+    "titleBar.inactiveBackground": "#24224d99",
+    "titleBar.inactiveForeground": "#e7e7e799"
+  },
+  "peacock.color": "#24224d"
 }

@@ -287,20 +287,20 @@ public class Robot extends TimedRobot {
   public void autonomousPeriodic() {
     switch (autoCommandIndex) {
       case 0:
-        rotate(45);
+        drive(1,4 );
         break;
       case 1:
         wait(3.0);
         break;
       case 2:
-        rotate(180);
-        break;
+      rotate (-90);
+      drive(1,3);
+      break;
       case 3:
-        wait(0.5);
-        break;
+      rotate(-90);
+      break;
       case 4:
-        rotate(0);
-        break;
+      drive( 1,3);
       default:
         drivetrain.drive(0, 0);
         break;
