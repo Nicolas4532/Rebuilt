@@ -25,7 +25,7 @@ public class Turret extends SubsystemBase {
     private static final double WRAP_TRIGGER_ANGLE = 345.0;
     private static final double WRAP_TARGET_TRAVEL = 360.0;
     private static final double WRAP_SEARCH_START = 100.0;
-    private static final double WRAP_SPEED = 0.25;
+    private static final double WRAP_SPEED = 0.3;
     
     // ==================== VELOCIDAD DE SEGUIMIENTO ====================
     private double trackingSpeedMultiplier = 2.0;  // ✅ NUEVO - multiplicador de velocidad (1.0 = 100%)

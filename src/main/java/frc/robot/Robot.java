@@ -33,7 +33,7 @@ public class Robot extends TimedRobot {
   private static final double kMaxTurretSpeed = 1;
   
   // ==================== APRIL TAG IDs ====================
-  private static final int RED_ALLIANCE_TAG = 1;
+  private static final int RED_ALLIANCE_TAG = 10;
   private static final int BLUE_ALLIANCE_TAG = 26;
   private int targetTagID = RED_ALLIANCE_TAG;
   
@@ -215,16 +215,20 @@ public class Robot extends TimedRobot {
     
     drivetrain.drive(forward, turn);
     
-    // ==================== INTAKE / SHOOT ====================
-    if (controller.getRawAxis(3) > 0.05) {
-      io.shoot(1);
-    } else if (controller.getRawAxis(2) > 0.05) {
-      io.intake(1);
-    } else if (controller.getBButton()) {
-      io.outtake(1);
-    } else {
-      io.stop(1);
-    }
+// ==================== INTAKE / SHOOT ====================
+if (controller.getRawAxis(3) > 0.05) {
+  // Usar secuencia de disparo con delay
+  io.startShootSequence(1);
+  
+} else if (controller.getRawAxis(2) > 0.05) {
+  io.intake(1);
+  
+} else if (controller.getBButton()) {
+  io.outtake(1);
+  
+} else {
+  io.stop(1);
+}
     
     // ==================== LIMELIGHT CON FILTRO DE TAG ====================
     double tx = limelight.getEntry("tx").getDouble(999);
@@ -284,27 +288,31 @@ public class Robot extends TimedRobot {
   }
   
   @Override
-  public void autonomousPeriodic() {
-    switch (autoCommandIndex) {
-      case 0:
-        drive(1,4 );
-        break;
-      case 1:
-        wait(3.0);
-        break;
-      case 2:
-      rotate (-90);
-      drive(1,3);
+public void autonomousPeriodic() {
+  double speedReq = 0;
+  double turnReq = gyro.getAutoTurnCommand(); // Obtener giro del PID del gyro
+
+  switch (autoCommandIndex) {
+    case 0:
+      drive(-1, 2.0); // Ejemplo: Velocidad 0.5 por 2 seg
       break;
-      case 3:
+    case 1:
+      wait(1.0);
+      break;
+    case 2:
       rotate(-90);
       break;
-      case 4:
-      drive( 1,3);
-      default:
-        drivetrain.drive(0, 0);
-        break;
-    }
+    // ... rest of cases
+    default:
+      drivetrain.drive(0, 0);
+      break;
+  
+
+  // IMPORTANTE: Solo llamar a drive una vez al final del método 
+  // si el comando actual no está controlando la conducción directamente.
+  // Pero en tu estructura actual, 'drive()' ya llama a 'drivetrain.drive'.
+  // Elimina la línea 'drivetrain.drive(0, turn)' que estaba suelta al final.
+}
     
     double turn = gyro.getAutoTurnCommand();
     drivetrain.drive(0, turn);
